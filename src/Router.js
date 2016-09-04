@@ -8,7 +8,10 @@ import routerReducer from './reducers/router';
 
 export default class Router extends React.Component {
   getChildContext() {
-    return { store: this.store };
+    return {
+      store: this.store,
+      routes: this.props.routes
+    };
   }
 
   componentWillMount() {
@@ -72,6 +75,6 @@ Router.propTypes = {
 };
 
 Router.childContextTypes = {
-  routes: routesShape.isRequired,
-  store: storeShape.isRequired
+  store: storeShape.isRequired,
+  routes: routesShape.isRequired
 };

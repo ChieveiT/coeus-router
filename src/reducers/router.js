@@ -1,36 +1,5 @@
-import isEmpty from 'lodash/isEmpty';
-import map from 'lodash/map';
-import fromPairs from 'lodash/fromPairs';
-
-function searchParse(str) {
-  if (isEmpty(str)) {
-    return { };
-  }
-
-  str = str.substr(1);
-  return fromPairs(
-    map(str.split('&'), (e) => {
-      let [ key, value ] = e.split('=');
-      return [
-        decodeURIComponent(key),
-        decodeURIComponent(value)
-      ];
-    })
-  );
-}
-
-function searchStringify(obj) {
-  if (isEmpty(obj)) {
-    return '';
-  }
-
-  return '?' + map(obj, (v, k) => {
-    return [
-      encodeURIComponent(k),
-      encodeURIComponent(v)
-    ].join('=');
-  }).join('&');
-}
+import searchParse from '../utils/searchParse';
+import searchStringify from '../utils/searchStringify';
 
 // a little hack to sync the popstate event
 function syncPopState() {
@@ -69,7 +38,11 @@ export default function router(routes) {
 
     switch (action.type) {
       case 'ROUTE': {
-        let path = action.path;
+        let { path, name } = action;
+        if (name !== undefined) {
+          let args = action.args;
+          path = routes.link(name, args);
+        }
 
         return routes.match(path).then((result) => {
           if (result === false) {
