@@ -33,8 +33,7 @@ describe('Reducers', () => {
             [ foo ],
             [ foo, bar ]
           ],
-          args: {},
-          search: { foo: 'bar' }
+          args: { foo: 'bar' }
         });
       });
     });
@@ -47,7 +46,7 @@ describe('Reducers', () => {
           type: 'ROUTE',
           path: '/foo123abc_bar',
           search: {
-            bar: 'foo'
+            baz: 'foo'
           }
         });
       }).then((result) => {
@@ -58,8 +57,7 @@ describe('Reducers', () => {
             [ foo ],
             [ bar ]
           ],
-          args: { bar: '123', foo: 'abc_' },
-          search: { bar: 'foo' }
+          args: { bar: '123', foo: 'abc_', baz: 'foo' }
         });
 
         return this.reducer(state, {
@@ -96,8 +94,7 @@ describe('Reducers', () => {
             [ foo ],
             [ foo, bar ]
           ],
-          args: {},
-          search: {}
+          args: {}
         });
       });
     });
@@ -128,8 +125,7 @@ describe('Reducers', () => {
             [ foo ],
             [ bar ]
           ],
-          args: { bar: '123' },
-          search: { foo: 'bar' }
+          args: { bar: '123', foo: 'bar' }
         });
       });
     });
@@ -140,8 +136,7 @@ describe('Reducers', () => {
           [ foo ],
           [ bar ]
         ],
-        args: { bar: '123' },
-        search: { foo: 'bar' }
+        args: { bar: '123', foo: 'bar' }
       };
 
       return Promise.resolve().then(() => {

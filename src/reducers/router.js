@@ -28,10 +28,11 @@ export default function router(routes) {
         }
 
         let { components, args } = result;
+        args = { ...args, ...search };
+
         return {
           components,
-          args,
-          search
+          args
         };
       });
     }
@@ -39,6 +40,8 @@ export default function router(routes) {
     switch (action.type) {
       case 'ROUTE': {
         let { path, name } = action;
+
+        // named route
         if (name !== undefined) {
           let args = action.args;
           path = routes.link(name, args);
@@ -46,16 +49,15 @@ export default function router(routes) {
 
         return routes.match(path).then((result) => {
           if (result === false) {
-            let { components, args, search } = state;
             return {
-              components,
-              args,
-              search,
+              ...state,
               notFound: path
             };
           }
 
           let search = action.search || {};
+          let { components, args } = result;
+          args = { ...args, ...search };
 
           history.pushState(
             null,
@@ -63,11 +65,9 @@ export default function router(routes) {
             path + searchStringify(search)
           );
 
-          let { components, args } = result;
           return {
             components,
-            args,
-            search
+            args
           };
         });
       }
@@ -85,10 +85,11 @@ export default function router(routes) {
 
           let { components, args } = result;
           let search = searchParse(window.location.search);
+          args = { ...args, ...search };
+
           return {
             components,
-            args,
-            search
+            args
           };
         });
       }
@@ -106,10 +107,11 @@ export default function router(routes) {
 
           let { components, args } = result;
           let search = searchParse(window.location.search);
+          args = { ...args, ...search };
+
           return {
             components,
-            args,
-            search
+            args
           };
         });
       }
