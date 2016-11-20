@@ -1,5 +1,3 @@
-import searchParse from '../utils/searchParse';
-import searchStringify from '../utils/searchStringify';
 
 // a little hack to sync the popstate event
 function syncPopState() {
@@ -16,104 +14,95 @@ function syncPopState() {
 export default function router(routes) {
   return function reducer(state, action) {
     if (state === undefined) {
-      let path = window.location.pathname;
-      let search = searchParse(window.location.search);
+      let target = (
+        window.location.pathname +
+        window.location.search
+      );
 
-      return routes.match(path).then((result) => {
-        if (result === false) {
-          throw new Error(
-            '404 Not Found: This should be handled in server. ' +
-            'A land page rendered in browser should not be 404.'
-          );
-        }
+      if (routes.check(target) === false) {
+        throw new Error(
+          '[Router] ' +
+          'A land page rendered in browser should not be 404. ' +
+          'This should be handled in server.'
+        );
+      }
 
-        let { components, args } = result;
-        args = { ...args, ...search };
-
-        return {
-          components,
-          args
-        };
-      });
+      state = {
+        status: 'LOADING',
+        location: target
+      };
     }
 
     switch (action.type) {
-      case 'ROUTE': {
-        let { path, name } = action;
+      case 'ROUTE_TO': {
+        let { path, name, args } = action;
 
-        // named route
-        if (name !== undefined) {
-          let args = action.args;
-          path = routes.link(name, args);
+        if (name && path) {
+          throw new Error(
+            '[Router] ' +
+            "'name' and 'path' should not be passed " +
+            'in action at the same time.'
+          );
         }
 
-        return routes.match(path).then((result) => {
-          if (result === false) {
-            return {
-              ...state,
-              notFound: path
-            };
-          }
+        let target = null;
+        if (name) {
+          target = routes.linkByName(name, args);
+        } else {
+          target = routes.linkByPath(path, args);
+        }
 
-          let search = action.search || {};
-          let { components, args } = result;
-          args = { ...args, ...search };
-
-          history.pushState(
-            null,
-            null,
-            path + searchStringify(search)
-          );
-
+        if (routes.check(target) === false) {
           return {
-            components,
-            args
+            ...state,
+            notFound: path
           };
-        });
+        }
+
+        history.pushState(null, null, target);
+
+        return {
+          ...state,
+          status: 'LOADING',
+          location: target
+        };
       }
       case 'ROUTE_BACK': {
-        let p = syncPopState();
+        let popState = syncPopState();
 
         history.back();
 
-        return p.then(() => {
-          return routes.match(window.location.pathname);
-        }).then((result) => {
-          // All 404 will not be pushed in history
-          // so it's impossible to get false result
-          // here.
-
-          let { components, args } = result;
-          let search = searchParse(window.location.search);
-          args = { ...args, ...search };
-
-          return {
-            components,
-            args
-          };
-        });
+        return popState.then(() => ({
+          ...state,
+          status: 'LOADING',
+          location: (
+            window.location.pathname +
+            window.location.search
+          )
+        }));
       }
       case 'ROUTE_FORWARD': {
-        let p = syncPopState();
+        let popState = syncPopState();
 
         history.forward();
 
-        return p.then(() => {
-          return routes.match(window.location.pathname);
-        }).then((result) => {
-          // All 404 will not be pushed in history
-          // so it's impossible to get false result
-          // here.
+        return popState.then(() => ({
+          ...state,
+          status: 'LOADING',
+          location: (
+            window.location.pathname +
+            window.location.search
+          )
+        }));
+      }
+      case 'ROUTE_LOADED': {
+        let { args } = action;
 
-          let { components, args } = result;
-          let search = searchParse(window.location.search);
-          args = { ...args, ...search };
-
-          return {
-            components,
-            args
-          };
-        });
+        return {
+          ...state,
+          status: 'LOADED',
+          args
+        };
       }
       default:
         return state;

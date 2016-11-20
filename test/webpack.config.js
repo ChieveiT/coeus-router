@@ -21,9 +21,7 @@ module.exports = {
     ]
   },
   entry: {
-    'routes': entry('mocha!./test/routes.spec.js'),
-    'reducerRouter': entry('mocha!./test/reducers/router.spec.js'),
-    'Router': entry('mocha!./test/Router.spec.js')
+    'routes': entry('mocha!./test/routes.spec.js')
   },
   output: {
     path: __dirname + '/build',
@@ -34,16 +32,6 @@ module.exports = {
     new HtmlWebpackPlugin({
       filename: 'routes.html',
       chunks: ['routes'],
-      template: './test/template/app.html'
-    }),
-    new HtmlWebpackPlugin({
-      filename: 'reducerRouter.html',
-      chunks: ['reducerRouter'],
-      template: './test/template/app.html'
-    }),
-    new HtmlWebpackPlugin({
-      filename: 'Router.html',
-      chunks: ['Router'],
       template: './test/template/app.html'
     })
   ]

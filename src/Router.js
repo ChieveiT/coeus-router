@@ -24,9 +24,16 @@ export default class Router extends React.Component {
     });
 
     this.unsubscribe = store.subscribe({
-      router: {
-        components: (components) => {
-          this.setState({ components });
+      router: function({ status, location }) {
+        if (status === 'LOADING') {
+          routes.match(location).then(({ components, args }) => {
+            store.dispatch({
+              type: 'ROUTE_LOADED',
+              args
+            });
+
+            this.setState({ components });
+          });
         }
       }
     });

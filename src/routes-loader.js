@@ -1,6 +1,6 @@
 'use strict';
 let _ = require('lodash');
-let template = require('./template');
+let template = require('./routes-template');
 
 // Because path.join will eat '.' which make
 // webpack's require works wrong, so we should
@@ -33,7 +33,6 @@ module.exports = function(source) {
   let namedRoutes = {};
 
   (function traverse(node, context) {
-    // check start -->
     if (_.isString(node.components)) {
       node.components = [ node.components ];
     }
@@ -55,7 +54,6 @@ module.exports = function(source) {
     if (node.name && !_.isEmpty(node.children)) {
       throw new Error('Named route is a leaf that can not has children');
     }
-    // <-- check end
 
     // create current context to avoid children's contexts
     // affect each other
@@ -170,9 +168,11 @@ module.exports = function(source) {
   routeTree.match = '<match function>';
   // add check to the root of tree
   routeTree.check = '<check function>';
-  // add _names and link to the root of tree
+  // add _names and linkByName to the root of tree
   routeTree._names = namedRoutes;
-  routeTree.link = '<link function>';
+  routeTree.linkByName = '<linkByName function>';
+  // add linkByPath to the root of tree
+  routeTree.linkByPath = '<linkByPath function>';
 
   // convert to source so we can hack it as string
   let routeSource = JSON.stringify(routeTree);
@@ -218,13 +218,23 @@ module.exports = function(source) {
     }
   );
 
-  // hack link to be a real function:)
+  // hack linkByName to be a real function:)
   routeSource = routeSource.replace(
-    /(["'])link\1\s*?:\s*?(["'])\<link function\>\2/g,
+    /(["'])linkByName\1\s*?:\s*?(["'])\<linkByName function\>\2/g,
     function() {
-      let func = template.getFunction(template.link);
+      let func = template.getFunction(template.linkByName);
 
-      return '"link": ' + func;
+      return '"linkByName": ' + func;
+    }
+  );
+
+  // hack linkByPath to be a real function:)
+  routeSource = routeSource.replace(
+    /(["'])linkByPath\1\s*?:\s*?(["'])\<linkByPath function\>\2/g,
+    function() {
+      let func = template.getFunction(template.linkByPath);
+
+      return '"linkByPath": ' + func;
     }
   );
 

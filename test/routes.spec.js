@@ -32,7 +32,7 @@ describe('Routes generated from Routes Loader', () => {
 
         expect(args).toEqual({ bar: '123', foo: 'abc_' });
       }),
-      routes.match('/foo123bar').then(function({
+      routes.match('/foo123bar?banana%26=123%3D321').then(function({
         components, args
       }) {
         expect(components).toEqual([
@@ -40,7 +40,7 @@ describe('Routes generated from Routes Loader', () => {
           [ bar ]
         ]);
 
-        expect(args).toEqual({ bar: '123' });
+        expect(args).toEqual({ bar: '123', 'banana&': '123=321' });
       }),
       routes.match('/foobar').then(function(r) {
         expect(r).toEqual(false);
@@ -59,31 +59,41 @@ describe('Routes generated from Routes Loader', () => {
     expect(routes.check('/not_found')).toEqual(false);
   });
 
-  it('exports link function to return a named route\'s path', () => {
+  it('exports linkByName function to return a named route\'s link', () => {
     let routes = require('./routes/link_function');
 
-    expect(routes.link('foo', { bar: 1, foo: 'abc' })).toEqual(
+    expect(routes.linkByName('foo', { bar: 1, foo: 'abc' })).toEqual(
       '/foo1/bar.fooabc_tail_'
     );
 
-    expect(routes.link('foo', { foo: 'abc' })).toEqual(
-      '/foo/bar.fooabc_tail_'
+    expect(routes.linkByName('foo', {
+      foo: 'abc', 'banana&': '123=321'
+    })).toEqual(
+      '/foo/bar.fooabc_tail_?banana%26=123%3D321'
     );
 
     expect(() => {
-      routes.link('name');
+      routes.linkByName('name');
     }).toThrow(/Unknown name.*/);
 
     expect(() => {
-      routes.link('foo', { arg: 666 });
-    }).toThrow(/Unknown argument.*/);
-
-    expect(() => {
-      routes.link('foo');
+      routes.linkByName('foo');
     }).toThrow(/Argument.*required/);
 
     expect(() => {
-      routes.link('foo', { foo: 233 });
+      routes.linkByName('foo', { foo: 233 });
     }).toThrow(/Argument.*illegal/);
+  });
+
+  it('exports linkByPath function to return a path\'s link', () => {
+    let routes = require('./routes/link_function');
+
+    expect(routes.linkByPath('/foo/bar', { bar: 1, foo: 'abc' })).toEqual(
+      '/foo/bar?bar=1&foo=abc'
+    );
+
+    expect(routes.linkByPath('/foo/bar', { 'banana&': '123=321' })).toEqual(
+      '/foo/bar?banana%26=123%3D321'
+    );
   });
 });

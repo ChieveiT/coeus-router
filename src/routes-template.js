@@ -11,9 +11,12 @@ module.exports = {
       });
     });
   },
-  match: function(path) {
-    let self = this;
+  match: function(target) {
+    let _tmp = target.split('?');
+    let path = _tmp.shift();
+    let searchStr = _tmp.shift() || '';
 
+    let self = this;
     return new Promise(function(resolve, reject) {
       let result = (function traverse(children, context) {
         for (let i = 0; i < children.length; i++) {
@@ -22,7 +25,7 @@ module.exports = {
           // create current context to avoid children's contexts
           // affect each other
           let remain = context.remain;
-          let componentsPromises = context.componentsPromises.slice(0);
+          let componentsPromises = context.componentsPromises.slice();
           let routeArguments = Object.assign({}, context.routeArguments);
 
           if (node._path) {
@@ -88,16 +91,26 @@ module.exports = {
       if (result === false) {
         resolve(false);
       } else {
-        // It seems hard to support es6 syntax in meta programming.
-        // _slicedToArray() will be missing.
-        // If you can solve this, please give me a PR:)
-        //
-        // let [ componentsPromises, routeArguments ] = result;
-
         Promise.all(result[0]).then(function(components) {
+          // search parse
+          let s = searchStr.split('&');
+          let searchObj = {};
+          for (let i in s) {
+            let pair = s[i].split('=');
+            let key = decodeURIComponent(pair.shift());
+            let value = decodeURIComponent(pair.shift() || '');
+
+            if (key !== '') {
+              searchObj[key] = value;
+            }
+          }
+
           resolve({
             components: components,
-            args: result[1]
+            args: Object.assign(
+              searchObj,
+              result[1]
+            )
           });
         }, function(e) {
           reject(e);
@@ -105,7 +118,9 @@ module.exports = {
       }
     });
   },
-  check: function(path) {
+  check: function(target) {
+    let path = target.split('?').shift();
+
     return (function traverse(children, context) {
       for (let i = 0; i < children.length; i++) {
         let node = children[i];
@@ -136,18 +151,12 @@ module.exports = {
       remain: path
     });
   },
-  link: function(name, args) {
+  linkByName: function(name, args) {
     let named = this._names[name];
     args = args || {};
 
     if (named === undefined) {
       throw new Error('Unknown name \'' + name + '\'');
-    }
-
-    for (let i in args) {
-      if (named.paramsOptional[i] === undefined) {
-        throw new Error('Unknown argument \'' + i + '\'');
-      }
     }
 
     let result = named.pathTemplate;
@@ -164,6 +173,37 @@ module.exports = {
       result = result.replace('<' + i + '>', args[i] || '');
     }
 
+    // search stringify
+    let search = [];
+    for (let i in args) {
+      if (named.paramsOptional[i] === undefined) {
+        search.push(
+          encodeURIComponent(i) + '=' +
+          encodeURIComponent(args[i])
+        );
+      }
+    }
+    search = search.join('&');
+    if (search !== '') {
+      result += '?' + search;
+    }
+
     return result;
+  },
+  linkByPath: function(path, args) {
+    // search stringify
+    let search = [];
+    for (let i in args) {
+      search.push(
+        encodeURIComponent(i) + '=' +
+        encodeURIComponent(args[i])
+      );
+    }
+    search = search.join('&');
+    if (search !== '') {
+      path += '?' + search;
+    }
+
+    return path;
   }
 };
