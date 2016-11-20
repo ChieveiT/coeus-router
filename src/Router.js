@@ -24,7 +24,7 @@ export default class Router extends React.Component {
     });
 
     this.unsubscribe = store.subscribe({
-      router: function({ status, location }) {
+      router: ({ status, location }) => {
         if (status === 'LOADING') {
           routes.match(location).then(({ components, args }) => {
             store.dispatch({
