@@ -6,12 +6,15 @@ export default function Link(props, context) {
   const { path, name, args, children, ...other } = props;
   const { store, routes } = context;
 
-  let action = { type: 'ROUTE', path };
-  let href = path;
+  let action = null;
+  let href = null;
 
-  if (name !== undefined) {
-    action = { type: 'ROUTE', name, args };
-    href = routes.link(name, args);
+  if (name) {
+    action = { type: 'ROUTE_TO', name, args };
+    href = routes.linkByName(name, args);
+  } else {
+    action = { type: 'ROUTE_TO', path, args };
+    href = routes.linkByPath(path, args);
   }
 
   return (
