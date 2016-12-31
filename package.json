@@ -1,6 +1,6 @@
 {
   "name": "coeus-router",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "A tiny router component to build SPA with webpack and react",
   "main": "lib/Router.js",
   "files": [
