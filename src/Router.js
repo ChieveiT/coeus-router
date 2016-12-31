@@ -54,11 +54,6 @@ export default class Router extends React.Component {
       }
     });
 
-    // initState
-    this.setState({
-      components: []
-    });
-
     store.initState();
   }
 
@@ -77,6 +72,8 @@ export default class Router extends React.Component {
 
   render() {
     let { components } = this.state;
+
+    components = components || [];
 
     let page = reduceRight(components, (children, types) => {
       return map(types, (type) => {
