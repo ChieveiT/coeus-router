@@ -5,8 +5,8 @@ function entry(e) {
   if (process.env.POLYFILL) {
     // This option is necessary in mocha-phantomjs 
     return [
-      'expose?Promise!./src/polyfill/Promise.js',
-      './src/polyfill/Object.assign.js',
+      'expose?Promise!./test/polyfill/Promise.js',
+      './test/polyfill/Object.assign.js',
       e
     ]
   } else {
