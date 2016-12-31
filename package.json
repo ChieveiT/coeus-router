@@ -62,7 +62,9 @@
     "react-dom": "^15.2.1",
     "rimraf": "^2.5.2",
     "webpack": "^1.13.1",
-    "yaml-loader": "^0.2.0"
+    "yaml-loader": "^0.2.0",
+    "coeux": "1.2.0",
+    "coeus-utils": "1.0.0"
   },
   "peerDependencies": {
     "react": "^0.14.0 || ^15.0.0-rc.1",
