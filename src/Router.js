@@ -5,6 +5,7 @@ import reduceRight from 'lodash/reduceRight';
 import { routesShape } from './types';
 import { storeShape } from 'coeux/lib/types';
 import routerReducer from './reducers/router';
+import { abortable } from 'coeus-utils';
 
 export default class Router extends React.Component {
   getChildContext() {
@@ -23,10 +24,25 @@ export default class Router extends React.Component {
       router: routerReducer(routes)
     });
 
+    // keep an abortable promise for routing
+    // so we can stop it whenever we want
+    this.routing = null;
+
     this.unsubscribe = store.subscribe({
       router: ({ status, location }) => {
         if (status === 'LOADING') {
-          routes.match(location).then(({ components, args }) => {
+          if (this.routing) {
+            this.routing.abort();
+            this.routing = null;
+          }
+
+          this.routing = abortable(
+            routes.match(location)
+          );
+
+          this.routing.then(({ components, args }) => {
+            this.routing = null;
+
             store.dispatch({
               type: 'ROUTE_LOADED',
               args
