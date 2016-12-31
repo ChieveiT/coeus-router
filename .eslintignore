@@ -3,4 +3,4 @@
 test/routes/**
 test/build/**
 test/generate.js
-src/polyfill/**
+test/polyfill/**
