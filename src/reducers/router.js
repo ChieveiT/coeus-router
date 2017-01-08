@@ -1,23 +1,15 @@
 
-// a little hack to sync the popstate event
-function syncPopState() {
-  return new Promise((resolve) => {
-    let restore = window.onpopstate;
-
-    window.onpopstate = function() {
-      window.onpopstate = restore;
-      resolve();
-    };
-  });
+function browserLocation() {
+  return (
+    window.location.pathname +
+    window.location.search
+  );
 }
 
 export default function router(routes) {
   return function reducer(state, action) {
     if (state === undefined) {
-      let target = (
-        window.location.pathname +
-        window.location.search
-      );
+      let target = browserLocation();
 
       if (routes.check(target) === false) {
         throw new Error(
@@ -59,41 +51,11 @@ export default function router(routes) {
           };
         }
 
-        history.pushState(null, null, target);
-
         return {
           ...state,
           status: 'LOADING',
           location: target
         };
-      }
-      case 'ROUTE_BACK': {
-        let popState = syncPopState();
-
-        history.back();
-
-        return popState.then(() => ({
-          ...state,
-          status: 'LOADING',
-          location: (
-            window.location.pathname +
-            window.location.search
-          )
-        }));
-      }
-      case 'ROUTE_FORWARD': {
-        let popState = syncPopState();
-
-        history.forward();
-
-        return popState.then(() => ({
-          ...state,
-          status: 'LOADING',
-          location: (
-            window.location.pathname +
-            window.location.search
-          )
-        }));
       }
       case 'ROUTE_LOADED': {
         let { args } = action;

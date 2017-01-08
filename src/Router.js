@@ -28,7 +28,7 @@ export default class Router extends React.Component {
     // so we can stop it whenever we want
     this.routing = null;
 
-    this.unsubscribe = store.subscribe({
+    this.unsubscribe1 = store.subscribe({
       router: ({ status, location }) => {
         if (status === 'LOADING') {
           if (this.routing) {
@@ -48,10 +48,16 @@ export default class Router extends React.Component {
               args
             });
 
+            history.pushState(null, null, location);
+
             this.setState({ components });
           });
         }
       }
+    });
+
+    this.setState({
+      components: []
     });
 
     store.initState();
@@ -72,8 +78,6 @@ export default class Router extends React.Component {
 
   render() {
     let { components } = this.state;
-
-    components = components || [];
 
     let page = reduceRight(components, (children, types) => {
       return map(types, (type) => {
