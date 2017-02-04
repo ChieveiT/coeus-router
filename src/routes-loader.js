@@ -40,17 +40,6 @@ module.exports = function(source) {
       throw new Error('Components must be string or array');
     }
 
-    let indexRoute = _.filter(node.children, function(child) {
-      return _.isEmpty(child.path);
-    });
-    if (indexRoute.length > 1) {
-      throw new Error('Duplicate index child of a route');
-    }
-
-    if (_.isEmpty(node.path) && !_.isEmpty(node.children)) {
-      throw new Error('Index route is a leaf that can not has children');
-    }
-
     if (node.name && !_.isEmpty(node.children)) {
       throw new Error('Named route is a leaf that can not has children');
     }

@@ -18,69 +18,81 @@ module.exports = {
 
     let self = this;
     return new Promise(function(resolve, reject) {
-      let result = (function traverse(children, context) {
-        for (let i = 0; i < children.length; i++) {
-          let node = children[i];
+      let result = (function traverse(node, context) {
+        // to avoid children's contexts affect each other
+        // copy context
+        let remain = context.remain;
+        let componentsPromises = context.componentsPromises.slice();
+        let routeArguments = Object.assign({}, context.routeArguments);
 
-          // create current context to avoid children's contexts
-          // affect each other
-          let remain = context.remain;
-          let componentsPromises = context.componentsPromises.slice();
-          let routeArguments = Object.assign({}, context.routeArguments);
+        let regex = new RegExp('^' + node._path, 'g');
 
-          if (node._path) {
-            let regex = new RegExp('^' + node._path, 'g');
+        if (node._path) {
+          let match = null;
+          if ((match = regex.exec(remain))) {
+            if (node._components) {
+              componentsPromises.push(node._components());
+            }
 
-            let match = null;
-            if ((match = regex.exec(remain))) {
-              if (node._components) {
-                componentsPromises.push(node._components());
+            for (let i = 1; i < match.length; i++) {
+              // optional arguments will be matched as undefined
+              // filter them
+              if (match[i] !== undefined) {
+                routeArguments[node._params[i - 1]] = match[i];
               }
+            }
 
-              for (let j = 1; j < match.length; j++) {
-                // optional arguments will be matched as
-                // undefined, so filter them
-                if (match[j]) {
-                  routeArguments[node._params[j - 1]] = match[j];
-                }
-              }
+            // if match has reached tail
+            // search for default routes on the subtree
+            if (regex.lastIndex === remain.length) {
+              let _children = node.children;
 
-              if (regex.lastIndex === remain.length) {
-                if (node.children) {
-                  // search for index route
-                  for (let k = 0; k < node.children.length; k++) {
-                    if (node.children[k]._path === undefined) {
-                      let index = node.children[i];
+              while (_children) {
+                for (let i in _children) {
+                  if (_children[i]._path === undefined) {
+                    let _default = _children[i];
 
-                      if (index._components) {
-                        componentsPromises.push(index._components());
-                      }
-
-                      break;
+                    if (_default._components) {
+                      componentsPromises.push(_default._components());
                     }
+
+                    _children = _default.children;
+                    break;
                   }
                 }
-
-                return [
-                  componentsPromises,
-                  routeArguments
-                ];
               }
 
-              if (node.children) {
-                return traverse(node.children, {
-                  remain: remain.substr(regex.lastIndex),
+              return [
+                componentsPromises,
+                routeArguments
+              ];
+            }
+          }
+        } else {
+          // a route without path (default route)
+          // regarded as always matched
+          if (node._components) {
+            componentsPromises.push(node._components());
+          }
+        }
 
-                  componentsPromises,
-                  routeArguments
-                });
-              }
+        if (node.children) {
+          for (let i in node.children) {
+            let _result = traverse(node.children[i], {
+              remain: remain.substr(regex.lastIndex),
+
+              componentsPromises,
+              routeArguments
+            });
+
+            if (_result) {
+              return _result;
             }
           }
         }
 
         return false;
-      })([ self ], {
+      })(self, {
         remain: path,
 
         componentsPromises: [],
@@ -90,64 +102,70 @@ module.exports = {
       // not match
       if (result === false) {
         resolve(false);
-      } else {
-        Promise.all(result[0]).then(function(components) {
-          // search parse
-          let s = searchStr.split('&');
-          let searchObj = {};
-          for (let i in s) {
-            let pair = s[i].split('=');
-            let key = decodeURIComponent(pair.shift());
-            let value = decodeURIComponent(pair.shift() || '');
-
-            if (key !== '') {
-              searchObj[key] = value;
-            }
-          }
-
-          resolve({
-            components: components,
-            args: Object.assign(
-              searchObj,
-              result[1]
-            )
-          });
-        }, function(e) {
-          reject(e);
-        });
+        return;
       }
+
+      let _componentsPromises = result[0];
+      let _routeArguments = result[1];
+
+      Promise.all(_componentsPromises).then(function(components) {
+        // search parse
+        let s = searchStr.split('&');
+        let searchObj = {};
+        for (let i in s) {
+          let pair = s[i].split('=');
+          let key = decodeURIComponent(pair.shift());
+          let value = decodeURIComponent(pair.shift() || '');
+
+          if (key !== '') {
+            searchObj[key] = value;
+          }
+        }
+
+        resolve({
+          components: components,
+          args: Object.assign(
+            searchObj,
+            _routeArguments
+          )
+        });
+      }, function(e) {
+        reject(e);
+      });
     });
   },
   check: function(target) {
     let path = target.split('?').shift();
 
-    return (function traverse(children, context) {
-      for (let i = 0; i < children.length; i++) {
-        let node = children[i];
+    return (function traverse(node, context) {
+      // to avoid children's contexts affect each other
+      // copy context
+      let remain = context.remain;
 
-        // create current context to avoid children's contexts
-        // affect each other
-        let remain = context.remain;
+      let regex = new RegExp('^' + node._path, 'g');
 
-        if (node._path) {
-          let regex = new RegExp('^' + node._path, 'g');
+      if (node._path) {
+        if (regex.exec(remain)) {
+          if (regex.lastIndex === remain.length) {
+            return true;
+          }
+        }
+      }
 
-          if (regex.exec(remain)) {
-            if (regex.lastIndex === remain.length) {
-              return true;
-            }
+      if (node.children) {
+        for (let i in node.children) {
+          let _result = traverse(node.children[i], {
+            remain: remain.substr(regex.lastIndex)
+          });
 
-            if (node.children) {
-              return traverse(node.children, {
-                remain: remain.substr(regex.lastIndex)
-              });
-            }
+          if (_result) {
+            return true;
           }
         }
       }
 
       return false;
-    })([ this ], {
+    })(this, {
       remain: path
     });
   },

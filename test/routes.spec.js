@@ -10,7 +10,26 @@ describe('Routes generated from Routes Loader', () => {
       routes.match('/').then(function({ components, args }) {
         expect(components).toEqual([
           [ foo ],
-          [ foo, bar ]
+          [ foo, bar ],
+          [ bar ]
+        ]);
+
+        expect(args).toEqual({ });
+      }),
+      routes.match('/default_child_one').then(function({ components, args }) {
+        expect(components).toEqual([
+          [ foo ],
+          [ foo, bar ],
+          [ foo ]
+        ]);
+
+        expect(args).toEqual({ });
+      }),
+      routes.match('/default_child_two').then(function({ components, args }) {
+        expect(components).toEqual([
+          [ foo ],
+          [ foo, bar ],
+          [ bar ]
         ]);
 
         expect(args).toEqual({ });
@@ -52,6 +71,8 @@ describe('Routes generated from Routes Loader', () => {
     let routes = require('./routes/match_function');
 
     expect(routes.check('/')).toEqual(true);
+    expect(routes.check('/default_child_one')).toEqual(true);
+    expect(routes.check('/default_child_two')).toEqual(true);
     expect(routes.check('/foo')).toEqual(true);
     expect(routes.check('/foo123abc_bar')).toEqual(true);
     expect(routes.check('/foo123bar')).toEqual(true);

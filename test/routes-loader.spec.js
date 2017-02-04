@@ -27,35 +27,6 @@ describe('Routes Loader loads routes', () => {
     }).toThrow(/Components.*string or array/);
   });
 
-  it('that should not have duplicate index child', () => {
-    let routeTree = `
-    path: '/'
-    components: 'foo'
-    children:
-      - components: 'foo'
-      - components: 'bar'
-    `;
-
-    expect(() => {
-      routeLoader(yamlLoader(routeTree));
-    }).toThrow(/Duplicate index child.*/);
-  });
-
-  it('whose index route should not have children', () => {
-    let routeTree = `
-    path: '/'
-    components: 'foo'
-    children:
-      - components: 'foo'
-        children:
-          - components: 'bar'
-    `;
-
-    expect(() => {
-      routeLoader(yamlLoader(routeTree));
-    }).toThrow(/Index route.*children/);
-  });
-
   it('whose named routes should not have children', () => {
     let routeTree = `
     path: '/'

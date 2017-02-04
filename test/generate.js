@@ -52,9 +52,14 @@ routeTree = `
 path: '/'
 components: '../stub/foo'
 children:
-  - components:
-    - '../stub/foo'
-    - '../stub/bar'
+  - components: ['../stub/foo', '../stub/bar']
+    children:
+    - path: 'default_child_one'
+      components: '../stub/foo'
+    - children:
+        - components: '../stub/bar'
+        - path: 'default_child_two'
+          components: '../stub/bar'
   - path: 'foo'
   - path: 'foo<bar:\\d+>'
     children: 
