@@ -13,17 +13,20 @@ export default function foo({ children }, { store }) {
             foo: 'bar'
           }
         });
-      }} />
+      }}
+      />
       <input type="button" value="back" onClick={function() {
         store.dispatch({
           type: 'ROUTE_BACK'
         });
-      }} />
+      }}
+      />
       <input type="button" value="forward" onClick={function() {
         store.dispatch({
           type: 'ROUTE_FORWARD'
         });
-      }} />
+      }}
+      />
       {children}
     </div>
   );
