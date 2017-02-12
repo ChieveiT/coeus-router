@@ -210,7 +210,7 @@ A Router component as a app's entry.
 
 ### _context_
 
-Router will create redux store and pass routes module to the components managed by it. There are two points:
+Router will create coeux store and pass routes module to the components managed by it. There are two points:
 * Use store in your components.
 * Do not use routes module directly. It usually be considered as an internal dependency.
 
@@ -232,7 +232,7 @@ Foo.contextTypes = {
 export default Foo;
 ```
 
-### _state structure_
+### _state in store_
 
 * `router`
   * `status`: 'LOADING' or 'LOADED'.
