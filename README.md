@@ -1,5 +1,9 @@
 # coeus-router
 
+[![Build Status](https://travis-ci.org/ChieveiT/coeus-router.svg?branch=master)](https://travis-ci.org/ChieveiT/coeus-router)
+[![npm version](https://img.shields.io/npm/v/coeus-router.svg?style=flat-square)](https://www.npmjs.com/package/coeus-router)
+[![npm downloads](https://img.shields.io/npm/dm/coeus-router.svg?style=flat-square)](https://www.npmjs.com/package/coeus-router)
+
 A tiny router toolset to build SPA with webpack and [coeux](https://github.com/ChieveiT/coeux). It contains three parts:
 
 * A loader for webpack.
