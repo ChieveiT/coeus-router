@@ -30,7 +30,7 @@ export default class Router extends React.Component {
 
     this.unsubscribe1 = store.subscribe({
       router: ({ status, location }) => {
-        if (status === 'LOADING') {
+        if (status === 'ROUTE_TO' || status === 'ROUTE_HISTORY') {
           if (this.routing) {
             this.routing.abort();
             this.routing = null;
@@ -48,13 +48,22 @@ export default class Router extends React.Component {
               args
             });
 
-            history.pushState(null, null, location);
+            if (status === 'ROUTE_TO') {
+              history.pushState(null, null, location);
+            }
 
             this.setState({ components });
           });
         }
       }
     });
+
+    this.originPopState = window.onpopstate;
+    window.onpopstate = function() {
+      store.dispatch({
+        type: 'ROUTE_HISTORY'
+      });
+    };
 
     this.setState({
       components: []
@@ -74,6 +83,7 @@ export default class Router extends React.Component {
   componentWillUnmount() {
     this.unmount();
     this.unsubscribe();
+    window.onpopstate = this.originPopState;
   }
 
   render() {

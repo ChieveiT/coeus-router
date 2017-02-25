@@ -20,7 +20,7 @@ export default function router(routes) {
       }
 
       state = {
-        status: 'LOADING',
+        status: 'ROUTE_TO',
         location: target
       };
     }
@@ -47,13 +47,30 @@ export default function router(routes) {
         if (routes.check(target) === false) {
           return {
             ...state,
-            notFound: path
+            notFound: Symbol(path)
           };
         }
 
         return {
           ...state,
-          status: 'LOADING',
+          status: 'ROUTE_TO',
+          location: target
+        };
+      }
+      case 'ROUTE_HISTORY': {
+        let target = browserLocation();
+
+        if (routes.check(target) === false) {
+          throw new Error(
+            '[Router] ' +
+            'A history page rendered in browser should not be 404. ' +
+            'This should be handled in server.'
+          );
+        }
+
+        return {
+          ...state,
+          status: 'ROUTE_HISTORY',
           location: target
         };
       }
@@ -62,7 +79,7 @@ export default function router(routes) {
 
         return {
           ...state,
-          status: 'LOADED',
+          status: 'ROUTE_LOADED',
           args
         };
       }
