@@ -56,10 +56,13 @@ children:
     children:
     - path: 'default_child_one'
       components: '../stub/foo'
+      name: default1
     - children:
         - components: '../stub/bar'
+          name: default
         - path: 'default_child_two'
           components: '../stub/bar'
+          name: default2
   - path: 'foo'
   - path: 'foo<bar:\\d+>'
     children: 

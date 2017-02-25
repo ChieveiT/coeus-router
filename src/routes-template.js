@@ -45,18 +45,18 @@ module.exports = {
             // if match has reached tail
             // search for default routes on the subtree
             if (regex.lastIndex === remain.length) {
-              let _children = node.children;
+              let _node = node;
 
-              while (_children) {
-                for (let i in _children) {
-                  if (_children[i]._path === undefined) {
-                    let _default = _children[i];
+              while (_node.children) {
+                for (let i in _node.children) {
+                  if (_node.children[i]._path === undefined) {
+                    let _default = _node.children[i];
 
                     if (_default._components) {
                       componentsPromises.push(_default._components());
                     }
 
-                    _children = _default.children;
+                    _node = _default;
                     break;
                   }
                 }
@@ -64,7 +64,8 @@ module.exports = {
 
               return [
                 componentsPromises,
-                routeArguments
+                routeArguments,
+                _node.name
               ];
             }
           }
@@ -107,6 +108,7 @@ module.exports = {
 
       let _componentsPromises = result[0];
       let _routeArguments = result[1];
+      let _routeName = result[2];
 
       Promise.all(_componentsPromises).then(function(components) {
         // search parse
@@ -127,7 +129,8 @@ module.exports = {
           args: Object.assign(
             searchObj,
             _routeArguments
-          )
+          ),
+          name: _routeName
         });
       }, function(e) {
         reject(e);

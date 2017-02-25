@@ -7,7 +7,7 @@ describe('Routes generated from Routes Loader', () => {
     let routes = require('./routes/match_function');
 
     return Promise.all([
-      routes.match('/').then(function({ components, args }) {
+      routes.match('/').then(function({ components, args, name }) {
         expect(components).toEqual([
           [ foo ],
           [ foo, bar ],
@@ -15,8 +15,12 @@ describe('Routes generated from Routes Loader', () => {
         ]);
 
         expect(args).toEqual({ });
+
+        expect(name).toEqual('default');
       }),
-      routes.match('/default_child_one').then(function({ components, args }) {
+      routes.match('/default_child_one').then(function({
+        components, args, name
+      }) {
         expect(components).toEqual([
           [ foo ],
           [ foo, bar ],
@@ -24,8 +28,12 @@ describe('Routes generated from Routes Loader', () => {
         ]);
 
         expect(args).toEqual({ });
+
+        expect(name).toEqual('default1');
       }),
-      routes.match('/default_child_two').then(function({ components, args }) {
+      routes.match('/default_child_two').then(function({
+        components, args, name
+      }) {
         expect(components).toEqual([
           [ foo ],
           [ foo, bar ],
@@ -33,16 +41,20 @@ describe('Routes generated from Routes Loader', () => {
         ]);
 
         expect(args).toEqual({ });
+
+        expect(name).toEqual('default2');
       }),
-      routes.match('/foo').then(function({ components, args }) {
+      routes.match('/foo').then(function({ components, args, name }) {
         expect(components).toEqual([
           [ foo ]
         ]);
 
         expect(args).toEqual({ });
+
+        expect(name).toEqual(undefined);
       }),
       routes.match('/foo123abc_bar').then(function({
-        components, args
+        components, args, name
       }) {
         expect(components).toEqual([
           [ foo ],
@@ -50,9 +62,11 @@ describe('Routes generated from Routes Loader', () => {
         ]);
 
         expect(args).toEqual({ bar: '123', foo: 'abc_' });
+
+        expect(name).toEqual(undefined);
       }),
       routes.match('/foo123bar?banana%26=123%3D321').then(function({
-        components, args
+        components, args, name
       }) {
         expect(components).toEqual([
           [ foo ],
@@ -60,6 +74,8 @@ describe('Routes generated from Routes Loader', () => {
         ]);
 
         expect(args).toEqual({ bar: '123', 'banana&': '123=321' });
+
+        expect(name).toEqual(undefined);
       }),
       routes.match('/foobar').then(function(r) {
         expect(r).toEqual(false);
