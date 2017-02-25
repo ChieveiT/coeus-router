@@ -75,12 +75,13 @@ export default function router(routes) {
         };
       }
       case 'ROUTE_LOADED': {
-        let { args } = action;
+        let { args, name } = action;
 
         return {
           ...state,
           status: 'ROUTE_LOADED',
-          args
+          args,
+          name
         };
       }
       default:

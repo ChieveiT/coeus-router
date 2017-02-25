@@ -40,12 +40,13 @@ export default class Router extends React.Component {
             routes.match(location)
           );
 
-          this.routing.then(({ components, args }) => {
+          this.routing.then(({ components, args, name }) => {
             this.routing = null;
 
             store.dispatch({
               type: 'ROUTE_LOADED',
-              args
+              args,
+              name
             });
 
             if (status === 'ROUTE_TO') {
