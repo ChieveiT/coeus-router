@@ -99,7 +99,7 @@ export default class Router extends React.Component {
     }, []);
 
     return React.createElement(
-      'div', null, ...page
+      'div', this.props, ...page
     );
   }
 }
