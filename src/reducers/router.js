@@ -19,43 +19,35 @@ export default function router(routes) {
         );
       }
 
-      state = {
-        status: 'ROUTE_TO',
-        location: target
-      };
+      return routes.match(target).then(({
+        components, args, name
+      }) => ({
+        location: target,
+        components,
+        args,
+        name
+      }));
     }
 
     switch (action.type) {
       case 'ROUTE_TO': {
-        let { path, name, args } = action;
-
-        if (name && path) {
-          throw new Error(
-            '[Router] ' +
-            "'name' and 'path' should not be passed " +
-            'in action at the same time.'
-          );
-        }
-
-        let target = null;
-        if (name) {
-          target = routes.linkByName(name, args);
-        } else {
-          target = routes.linkByPath(path, args);
-        }
+        let { target } = action;
 
         if (routes.check(target) === false) {
           return {
             ...state,
-            notFound: Symbol(path)
+            notFound: Symbol(target)
           };
         }
 
-        return {
-          ...state,
-          status: 'ROUTE_TO',
-          location: target
-        };
+        return routes.match(target).then(({
+          components, args, name
+        }) => ({
+          location: target,
+          components,
+          args,
+          name
+        }));
       }
       case 'ROUTE_HISTORY': {
         let target = browserLocation();
@@ -68,21 +60,14 @@ export default function router(routes) {
           );
         }
 
-        return {
-          ...state,
-          status: 'ROUTE_HISTORY',
-          location: target
-        };
-      }
-      case 'ROUTE_LOADED': {
-        let { args, name } = action;
-
-        return {
-          ...state,
-          status: 'ROUTE_LOADED',
+        return routes.match(target).then(({
+          components, args, name
+        }) => ({
+          location: target,
+          components,
           args,
           name
-        };
+        }));
       }
       default:
         return state;

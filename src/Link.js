@@ -6,16 +6,14 @@ export default function Link(props, context) {
   const { path, name, args, children, ...other } = props;
   const { store, routes } = context;
 
-  let action = null;
   let href = null;
-
   if (name) {
-    action = { type: 'ROUTE_TO', name, args };
     href = routes.linkByName(name, args);
   } else {
-    action = { type: 'ROUTE_TO', path, args };
     href = routes.linkByPath(path, args);
   }
+
+  let action = { type: 'ROUTE_TO', target: href };
 
   return (
     <a
@@ -23,7 +21,7 @@ export default function Link(props, context) {
       href={href}
       onClick={function(e) {
         e.preventDefault();
-        store.dispatch(action);
+        store.dispatch(action, true);
         return false;
       }}
     >{children}</a>
